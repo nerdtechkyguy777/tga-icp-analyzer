@@ -7,7 +7,7 @@
       "name": "Target Industries",
       "description": "Product-led and platform companies in TGA's core verticals. Manufacturing, semiconductor, and industrial B2B are high-priority targets.",
       "type": "industry",
-      "weight": 25,
+      "weight": 29,
       "required": true,
       "active": true,
       "order": 0,
@@ -99,7 +99,7 @@
       "name": "Company Size",
       "description": "Employee count range for ideal customers. Contributes to weighted score — outside range lowers score but does not auto-disqualify.",
       "type": "employee_size",
-      "weight": 20,
+      "weight": 10,
       "required": false,
       "active": true,
       "order": 2,
@@ -130,7 +130,7 @@
       "name": "Target Geography",
       "description": "Companies headquartered or actively operating in India, MEA (Middle East & Africa), SEA (Southeast Asia), or USA. Contributes to weighted score — outside target regions lowers score but does not auto-disqualify.",
       "type": "country",
-      "weight": 15,
+      "weight": 18,
       "required": false,
       "active": true,
       "order": 3,
@@ -152,7 +152,7 @@
       "name": "Business Model",
       "description": "Must be a B2B product or platform company — not a generic service provider.",
       "type": "business_model",
-      "weight": 10,
+      "weight": 12,
       "required": true,
       "active": true,
       "order": 5,
@@ -290,7 +290,7 @@
       "name": "Company Characteristics",
       "description": "Qualitative signals — product company vs generic service provider.",
       "type": "company_characteristic",
-      "weight": 5,
+      "weight": 6,
       "required": false,
       "active": true,
       "order": 9,
@@ -313,11 +313,11 @@
       ]
     }
   ],
-  "version": "1.1",
+  "version": "1.2",
   "metadata": {
     "createdAt": "2026-09-03T04:08:23.611Z",
-    "updatedAt": "2026-09-03T04:13:30.305Z",
+    "updatedAt": "2026-09-03T08:02:00.000Z",
     "updatedBy": "Admin",
-    "changeSummary": "Changed Company Size "
+    "changeSummary": "Lowered Company Size weight to 10; redistributed +10 across other scoring criteria"
   }
 }
