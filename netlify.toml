@@ -7,6 +7,10 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Analysis + ICP API routes can run up to 26s on Netlify (requires paid plan for >10s on some tiers)
+# Enable Netlify Blobs for serverless functions (ICP + analysis persistence)
+[functions."*"]
+  netlify_blobs = ["tga-icp-data"]
+
+# Analysis + ICP API routes can run longer on paid plans
 [functions]
   node_bundler = "esbuild"

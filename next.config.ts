@@ -1,8 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Required for Netlify — do not statically export
-  output: undefined,
+  // Bundle seed data files into serverless output (Netlify read-only FS)
+  outputFileTracingIncludes: {
+    "/*": ["./data/**/*"],
+    "/api/**/*": ["./data/**/*"],
+    "/icp/**/*": ["./data/**/*"],
+  },
 };
 
 export default nextConfig;

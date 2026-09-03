@@ -19,8 +19,7 @@ const BLOB_KEYS = {
   analyses: "analyses",
 } as const;
 
-/** Netlify serverless has a read-only filesystem — use Netlify Blobs in production. */
-function useBlobStorage(): boolean {
+function isNetlifyRuntime(): boolean {
   return process.env.NETLIFY === "true";
 }
 
@@ -30,7 +29,21 @@ function ensureDataDir() {
   }
 }
 
+/** Read JSON from disk without creating or writing files (safe on read-only FS). */
+function readJsonFileReadOnly<T>(filePath: string, fallback: T): T {
+  try {
+    if (!fs.existsSync(filePath)) return fallback;
+    return JSON.parse(fs.readFileSync(filePath, "utf-8")) as T;
+  } catch {
+    return fallback;
+  }
+}
+
 function readJsonFile<T>(filePath: string, fallback: T): T {
+  if (isNetlifyRuntime()) {
+    return readJsonFileReadOnly(filePath, fallback);
+  }
+
   ensureDataDir();
   if (!fs.existsSync(filePath)) {
     writeJsonFile(filePath, fallback);
@@ -41,31 +54,17 @@ function readJsonFile<T>(filePath: string, fallback: T): T {
 }
 
 function writeJsonFile<T>(filePath: string, data: T): void {
+  if (isNetlifyRuntime()) return;
   ensureDataDir();
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
 }
 
-/** Seed ICP from committed repo files when Blobs are empty on first deploy. */
 function readSeedICP(): ICPKnowledgeBase {
-  if (fs.existsSync(ICP_CURRENT_FILE)) {
-    try {
-      return JSON.parse(fs.readFileSync(ICP_CURRENT_FILE, "utf-8")) as ICPKnowledgeBase;
-    } catch {
-      /* fall through */
-    }
-  }
-  return DEFAULT_ICP_KNOWLEDGE_BASE;
+  return readJsonFileReadOnly(ICP_CURRENT_FILE, DEFAULT_ICP_KNOWLEDGE_BASE);
 }
 
 function readSeedHistory(): ICPVersionRecord[] {
-  if (fs.existsSync(ICP_HISTORY_FILE)) {
-    try {
-      return JSON.parse(fs.readFileSync(ICP_HISTORY_FILE, "utf-8")) as ICPVersionRecord[];
-    } catch {
-      /* fall through */
-    }
-  }
-  return [];
+  return readJsonFileReadOnly(ICP_HISTORY_FILE, []);
 }
 
 async function getBlobStore() {
@@ -74,25 +73,36 @@ async function getBlobStore() {
 }
 
 async function blobGet<T>(key: string): Promise<T | null> {
-  const store = await getBlobStore();
-  const data = await store.get(key, { type: "json" });
-  return (data as T) ?? null;
+  try {
+    const store = await getBlobStore();
+    const data = await store.get(key, { type: "json" });
+    return (data as T) ?? null;
+  } catch (error) {
+    console.warn(`[storage] Blob read failed (${key}):`, error);
+    return null;
+  }
 }
 
-async function blobSet<T>(key: string, data: T): Promise<void> {
-  const store = await getBlobStore();
-  await store.setJSON(key, data);
+async function blobSet<T>(key: string, data: T): Promise<boolean> {
+  try {
+    const store = await getBlobStore();
+    await store.setJSON(key, data);
+    return true;
+  } catch (error) {
+    console.warn(`[storage] Blob write failed (${key}):`, error);
+    return false;
+  }
 }
 
 // ─── ICP Current ─────────────────────────────────────────────────────────────
 
 export async function getCurrentICP(): Promise<ICPKnowledgeBase> {
-  if (useBlobStorage()) {
+  if (isNetlifyRuntime()) {
     const cached = await blobGet<ICPKnowledgeBase>(BLOB_KEYS.icpCurrent);
     if (cached) return cached;
 
     const seeded = readSeedICP();
-    await saveCurrentICP(seeded);
+    await blobSet(BLOB_KEYS.icpCurrent, seeded);
     return seeded;
   }
 
@@ -100,8 +110,11 @@ export async function getCurrentICP(): Promise<ICPKnowledgeBase> {
 }
 
 export async function saveCurrentICP(kb: ICPKnowledgeBase): Promise<void> {
-  if (useBlobStorage()) {
-    await blobSet(BLOB_KEYS.icpCurrent, kb);
+  if (isNetlifyRuntime()) {
+    const saved = await blobSet(BLOB_KEYS.icpCurrent, kb);
+    if (!saved) {
+      console.warn("[storage] Could not persist ICP — Netlify Blobs unavailable");
+    }
     return;
   }
   writeJsonFile(ICP_CURRENT_FILE, kb);
@@ -112,7 +125,7 @@ export async function saveCurrentICP(kb: ICPKnowledgeBase): Promise<void> {
 export async function getICPHistory(): Promise<ICPVersionRecord[]> {
   let history: ICPVersionRecord[];
 
-  if (useBlobStorage()) {
+  if (isNetlifyRuntime()) {
     const cached = await blobGet<ICPVersionRecord[]>(BLOB_KEYS.icpHistory);
     if (cached) {
       history = cached;
@@ -133,7 +146,7 @@ export async function getICPHistory(): Promise<ICPVersionRecord[]> {
       await blobSet(BLOB_KEYS.icpHistory, history);
     }
   } else {
-    history = readJsonFile<ICPVersionRecord[]>(ICP_HISTORY_FILE, []);
+    history = readJsonFile(ICP_HISTORY_FILE, []);
   }
 
   const current = await getCurrentICP();
@@ -147,7 +160,7 @@ export async function getICPHistory(): Promise<ICPVersionRecord[]> {
       knowledgeBase: current,
     };
     history.push(initial);
-    await blobSetHistory(history);
+    await persistHistory(history);
   }
 
   return history.sort(
@@ -155,8 +168,8 @@ export async function getICPHistory(): Promise<ICPVersionRecord[]> {
   );
 }
 
-async function blobSetHistory(history: ICPVersionRecord[]): Promise<void> {
-  if (useBlobStorage()) {
+async function persistHistory(history: ICPVersionRecord[]): Promise<void> {
+  if (isNetlifyRuntime()) {
     await blobSet(BLOB_KEYS.icpHistory, history);
   } else {
     writeJsonFile(ICP_HISTORY_FILE, history);
@@ -171,14 +184,14 @@ export async function getICPVersion(version: string): Promise<ICPVersionRecord |
 export async function addICPVersion(record: ICPVersionRecord): Promise<void> {
   const history = await getICPHistory();
   history.unshift(record);
-  await blobSetHistory(history);
+  await persistHistory(history);
   await saveCurrentICP(record.knowledgeBase);
 }
 
 // ─── Analyses ────────────────────────────────────────────────────────────────
 
 export async function getAnalyses(): Promise<AnalysisResult[]> {
-  if (useBlobStorage()) {
+  if (isNetlifyRuntime()) {
     const cached = await blobGet<AnalysisResult[]>(BLOB_KEYS.analyses);
     return (cached ?? []).sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -199,9 +212,13 @@ export async function saveAnalysis(result: AnalysisResult): Promise<void> {
   const analyses = await getAnalyses();
   analyses.unshift(result);
 
-  if (useBlobStorage()) {
-    await blobSet(BLOB_KEYS.analyses, analyses);
-  } else {
-    writeJsonFile(ANALYSES_FILE, analyses);
+  if (isNetlifyRuntime()) {
+    const saved = await blobSet(BLOB_KEYS.analyses, analyses);
+    if (!saved) {
+      console.warn("[storage] Could not persist analysis — Netlify Blobs unavailable");
+    }
+    return;
   }
+
+  writeJsonFile(ANALYSES_FILE, analyses);
 }
