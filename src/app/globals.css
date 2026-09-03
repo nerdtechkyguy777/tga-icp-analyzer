@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-tga-gradient-light text-gray-900 antialiased min-h-screen;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
+  }
+  .btn-primary {
+    @apply btn bg-tga-orange-500 text-white hover:bg-tga-orange-600 focus:ring-tga-orange-400 hover:shadow-md active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply btn bg-white text-tga-teal-700 border-2 border-tga-teal-500 hover:bg-tga-teal-50 focus:ring-tga-teal-400;
+  }
+  .btn-teal {
+    @apply btn bg-tga-teal-500 text-white hover:bg-tga-teal-600 focus:ring-tga-teal-400 hover:shadow-md;
+  }
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  }
+  .btn-ghost {
+    @apply btn text-tga-teal-700 hover:bg-tga-teal-50 focus:ring-tga-teal-400 shadow-none;
+  }
+  .input {
+    @apply block w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-tga-teal-500 focus:outline-none focus:ring-2 focus:ring-tga-teal-200;
+  }
+  .label {
+    @apply block text-sm font-semibold text-tga-teal-800 mb-1;
+  }
+  .card {
+    @apply bg-white rounded-xl border border-tga-teal-100 shadow-md shadow-tga-teal-500/5;
+  }
+  .card-teal {
+    @apply card border-tga-teal-200 bg-gradient-to-br from-white to-tga-teal-50;
+  }
+  .card-orange {
+    @apply card border-tga-orange-200 bg-gradient-to-br from-white to-tga-orange-50;
+  }
+  .page-header {
+    @apply bg-tga-gradient rounded-xl sm:rounded-2xl px-4 py-6 sm:px-6 sm:py-8 text-white shadow-lg shadow-tga-teal-900/20 mb-6 sm:mb-8;
+  }
+  .page-header h1 {
+    @apply text-2xl md:text-3xl font-bold;
+  }
+  .page-header p {
+    @apply text-tga-teal-100 mt-2 text-sm md:text-base;
+  }
+  .stat-card {
+    @apply card p-5 border-l-4 hover:shadow-lg transition-shadow duration-200;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+  .badge-green {
+    @apply badge bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200;
+  }
+  .badge-yellow {
+    @apply badge bg-amber-100 text-amber-800 ring-1 ring-amber-200;
+  }
+  .badge-red {
+    @apply badge bg-red-100 text-red-800 ring-1 ring-red-200;
+  }
+  .badge-blue {
+    @apply badge bg-sky-100 text-sky-800 ring-1 ring-sky-200;
+  }
+  .badge-gray {
+    @apply badge bg-gray-100 text-gray-700 ring-1 ring-gray-200;
+  }
+  .badge-teal {
+    @apply badge bg-tga-teal-100 text-tga-teal-800 ring-1 ring-tga-teal-200;
+  }
+  .badge-orange {
+    @apply badge bg-tga-orange-100 text-tga-orange-800 ring-1 ring-tga-orange-200;
+  }
+}
+
+@keyframes ai-pulse-ring {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.9;
+  }
+}
+
+@keyframes ai-orbit {
+  from {
+    transform: rotate(0deg) translateX(22px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(22px) rotate(-360deg);
+  }
+}
+
+@keyframes ai-dot-bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ai-sparkle-twinkle {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.9) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotate(12deg);
+  }
+}
+
+@keyframes ai-shimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+@keyframes ai-popup-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes ai-status-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ai-pulse-ring {
+  animation: ai-pulse-ring 2s ease-in-out infinite;
+}
+
+.ai-orbit-dot {
+  animation: ai-orbit 2.4s linear infinite;
+}
+
+.ai-dot {
+  animation: ai-dot-bounce 1.2s ease-in-out infinite;
+}
+
+.ai-sparkle {
+  animation: ai-sparkle-twinkle 1.8s ease-in-out infinite;
+}
+
+.ai-shimmer-bar {
+  background-size: 200% 100%;
+  animation: ai-shimmer 2s linear infinite;
+}
+
+.ai-popup-enter {
+  animation: ai-popup-enter 0.25s ease-out forwards;
+}
+
+.ai-status-fade {
+  animation: ai-status-fade 0.35s ease-out;
+}

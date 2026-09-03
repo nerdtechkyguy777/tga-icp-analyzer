@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Analysis + ICP API routes can run up to 26s on Netlify (requires paid plan for >10s on some tiers)
+[functions]
+  node_bundler = "esbuild"

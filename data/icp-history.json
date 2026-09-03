@@ -1,0 +1,646 @@
+[
+  {
+    "version": "1.1",
+    "updatedAt": "2026-09-03T04:13:30.305Z",
+    "updatedBy": "Admin",
+    "changeSummary": "Changed Company Size ",
+    "knowledgeBase": {
+      "name": "TGA Ideal Customer Profile",
+      "description": "B2B product and platform companies across IT, SaaS, manufacturing, semiconductor, industrial, cybersecurity, HRMS, fintech, analytics, robotics, and logistics — excluding generic service providers.",
+      "criteria": [
+        {
+          "id": "target_industries",
+          "name": "Target Industries",
+          "description": "Product-led and platform companies in TGA's core verticals. Manufacturing, semiconductor, and industrial B2B are high-priority targets.",
+          "type": "industry",
+          "weight": 25,
+          "required": true,
+          "active": true,
+          "order": 0,
+          "isHardRule": false,
+          "rules": [],
+          "positiveSignals": [
+            "Manufacturing company with B2B products or components",
+            "Semiconductor, chip design, or fabrication company",
+            "Industrial equipment or machinery manufacturer",
+            "Owns a proprietary software product or platform",
+            "Product-led B2B company",
+            "Vertical SaaS with a defined niche",
+            "Examples: Veris, 75F, KloudLearn, Lecturio, SkaleUp, OneBill, UV Robots"
+          ],
+          "negativeSignals": [
+            "Agency or body-shop model",
+            "Project-based services without own product",
+            "Generic IT outsourcing"
+          ],
+          "values": [
+            "IT Products",
+            "SaaS Companies",
+            "Manufacturing",
+            "Semiconductor",
+            "Industrial B2B",
+            "Electronics Manufacturing",
+            "Hardware B2B",
+            "Industrial Automation",
+            "Cyber Security",
+            "Cybersecurity Consultants",
+            "Building & Admin Management",
+            "HRMS",
+            "Talent Lifecycle Management Software",
+            "Training & Learning Solutions",
+            "Analytics",
+            "AI",
+            "BI & ML",
+            "Robotics & Automation",
+            "Logistics & Supply Chain",
+            "WMS",
+            "PLM",
+            "Business Development Software",
+            "Sales Software",
+            "Fintech",
+            "Manufacturing B2B Offerings"
+          ]
+        },
+        {
+          "id": "priority_manufacturing_semiconductor",
+          "name": "Priority: Manufacturing & Semiconductor",
+          "description": "TGA's highest-priority verticals. Manufacturing, semiconductor, industrial, electronics, and hardware B2B companies should receive HIGH scores — this is who we want to work with most.",
+          "type": "industry",
+          "weight": 10,
+          "required": false,
+          "active": true,
+          "order": 1,
+          "isHardRule": false,
+          "rules": [],
+          "positiveSignals": [
+            "B2B manufacturing with global go-to-market",
+            "Semiconductor or electronics component supplier",
+            "Industrial automation or robotics manufacturer",
+            "OEM selling to other businesses",
+            "High-priority vertical — strong fit for TGA"
+          ],
+          "negativeSignals": [
+            "Pure consumer retail manufacturing with no B2B line",
+            "Manufacturing-only job shop with no product brand"
+          ],
+          "values": [
+            "Manufacturing",
+            "Semiconductor",
+            "Semiconductors",
+            "Industrial B2B",
+            "Electronics Manufacturing",
+            "Hardware B2B",
+            "Industrial Automation",
+            "Precision Manufacturing",
+            "Contract Manufacturing",
+            "OEM B2B",
+            "Chip Design",
+            "Fabrication",
+            "Industrial Equipment",
+            "Machinery Manufacturing"
+          ]
+        },
+        {
+          "id": "employee_size",
+          "name": "Company Size",
+          "description": "Employee count range for ideal customers",
+          "type": "employee_size",
+          "weight": 20,
+          "required": true,
+          "active": true,
+          "order": 2,
+          "isHardRule": true,
+          "rules": [
+            {
+              "id": "emp_min",
+              "field": "employee_count",
+              "operator": "gte",
+              "value": 50,
+              "description": "Minimum 50 employees",
+              "isHardRule": true
+            },
+            {
+              "id": "emp_max",
+              "field": "employee_count",
+              "operator": "lte",
+              "value": 1000,
+              "description": "Maximum 1000 employees",
+              "isHardRule": true
+            }
+          ],
+          "minValue": 50,
+          "maxValue": 20000
+        },
+        {
+          "id": "target_geography",
+          "name": "Target Geography",
+          "description": "Companies headquartered or actively operating in India, MEA (Middle East & Africa), SEA (Southeast Asia), or USA.",
+          "type": "country",
+          "weight": 15,
+          "required": true,
+          "active": true,
+          "order": 3,
+          "isHardRule": true,
+          "rules": [],
+          "positiveSignals": [
+            "Headquartered in India, USA, Middle East, Africa, or Southeast Asia",
+            "Active go-to-market in target regions"
+          ],
+          "values": [
+            "India",
+            "MEA",
+            "SEA",
+            "USA"
+          ]
+        },
+        {
+          "id": "target_rpc",
+          "name": "Target Decision Makers (RPC)",
+          "description": "Right Persona to Contact — senior marketing, revenue, and growth leaders.",
+          "type": "job_title",
+          "weight": 15,
+          "required": false,
+          "active": true,
+          "order": 4,
+          "isHardRule": false,
+          "rules": [],
+          "positiveSignals": [
+            "Senior marketing or revenue leader identifiable on website or LinkedIn",
+            "Founder-led B2B company with clear GTM leadership"
+          ],
+          "values": [
+            "Marketing Head",
+            "Business Development Head",
+            "VP Sales",
+            "VP Marketing",
+            "Director of Sales and Marketing",
+            "Director of Revenue & Growth",
+            "Founder",
+            "Co-founder",
+            "CEO",
+            "CMO",
+            "Chief Strategy Officer",
+            "Demand Generation Head"
+          ]
+        },
+        {
+          "id": "business_model",
+          "name": "Business Model",
+          "description": "Must be a B2B product or platform company — not a generic service provider.",
+          "type": "business_model",
+          "weight": 10,
+          "required": true,
+          "active": true,
+          "order": 5,
+          "isHardRule": false,
+          "rules": [],
+          "positiveSignals": [
+            "Subscription or license-based product",
+            "Enterprise B2B sales motion",
+            "Manufacturing with B2B offerings",
+            "Semiconductor or industrial B2B sales"
+          ],
+          "negativeSignals": [
+            "Pure services agency",
+            "Staff augmentation",
+            "Project outsourcing"
+          ],
+          "preferredModels": [
+            "B2B"
+          ]
+        },
+        {
+          "id": "excluded_lead_gen_competitors",
+          "name": "Excluded: B2B Lead Gen & Demand Gen",
+          "description": "TGA is a B2B lead generation company. Direct competitors offering lead generation or demand generation services are automatically rejected with score 0.",
+          "type": "exclusion",
+          "weight": 0,
+          "required": true,
+          "active": true,
+          "order": 6,
+          "isHardRule": true,
+          "rules": [],
+          "positiveSignals": [],
+          "negativeSignals": [
+            "B2B lead generation",
+            "demand generation",
+            "demand gen",
+            "lead gen agency",
+            "we generate leads for",
+            "qualified B2B leads",
+            "appointment setting services",
+            "sales development outsourcing",
+            "outbound lead generation",
+            "pipeline generation services",
+            "delivering sales & marketing solutions"
+          ],
+          "values": [
+            "B2B Lead Generation",
+            "Lead Generation",
+            "Demand Generation",
+            "Demand Gen",
+            "Lead Gen Agency",
+            "Lead Generation Services",
+            "Demand Generation Services",
+            "Outbound Lead Generation",
+            "Sales Development Services",
+            "Appointment Setting",
+            "BDR Services",
+            "SDR Services",
+            "Pipeline Generation",
+            "Qualified Leads Provider",
+            "Sales Leads Agency"
+          ]
+        },
+        {
+          "id": "excluded_services",
+          "name": "Excluded Service Providers",
+          "description": "Generic service companies that do NOT fit TGA ICP — automatically disqualify.",
+          "type": "exclusion",
+          "weight": 0,
+          "required": true,
+          "active": true,
+          "order": 7,
+          "isHardRule": true,
+          "rules": [],
+          "positiveSignals": [],
+          "negativeSignals": [
+            "We build websites for clients",
+            "Full-service marketing agency",
+            "Hire our developers",
+            "Custom development services",
+            "Generic digital agency"
+          ],
+          "values": [
+            "Web Development",
+            "Web Development Services",
+            "Website Development Agency",
+            "Marketing Agency",
+            "Marketing Services",
+            "Digital Marketing Agency",
+            "Generic IT Services",
+            "IT Consulting Services",
+            "Staff Augmentation",
+            "Outsourcing Services",
+            "Freelance Agency"
+          ]
+        },
+        {
+          "id": "company_characteristics",
+          "name": "Company Characteristics",
+          "description": "Qualitative signals — product company vs generic service provider.",
+          "type": "company_characteristic",
+          "weight": 5,
+          "required": false,
+          "active": true,
+          "order": 8,
+          "isHardRule": false,
+          "rules": [],
+          "positiveSignals": [
+            "Own product or platform mentioned prominently",
+            "Case studies about product adoption, not just project delivery",
+            "Pricing page or product tiers",
+            "Active product development and roadmap",
+            "Manufacturing company with B2B product line",
+            "Semiconductor or industrial company selling B2B"
+          ],
+          "negativeSignals": [
+            "Portfolio of client websites built",
+            "Services menu: web dev, SEO, social media",
+            "No own product — only client work",
+            "Staffing or body-shop language"
+          ]
+        }
+      ],
+      "version": "1.1",
+      "metadata": {
+        "createdAt": "2026-09-03T04:08:23.611Z",
+        "updatedAt": "2026-09-03T04:13:30.305Z",
+        "updatedBy": "Admin",
+        "changeSummary": "Changed Company Size "
+      }
+    }
+  },
+  {
+    "version": "1.0",
+    "updatedAt": "2026-09-03T04:08:23.611Z",
+    "updatedBy": "System",
+    "changeSummary": "Initial TGA ICP v1.0 — product-led B2B companies in India, MEA, SEA, USA",
+    "knowledgeBase": {
+      "version": "1.0",
+      "name": "TGA Ideal Customer Profile",
+      "description": "B2B product and platform companies across IT, SaaS, manufacturing, semiconductor, industrial, cybersecurity, HRMS, fintech, analytics, robotics, and logistics — excluding generic service providers.",
+      "criteria": [
+        {
+          "id": "target_industries",
+          "name": "Target Industries",
+          "description": "Product-led and platform companies in TGA's core verticals. Manufacturing, semiconductor, and industrial B2B are high-priority targets.",
+          "type": "industry",
+          "weight": 25,
+          "required": true,
+          "active": true,
+          "order": 0,
+          "isHardRule": false,
+          "rules": [],
+          "values": [
+            "IT Products",
+            "SaaS Companies",
+            "Manufacturing",
+            "Semiconductor",
+            "Industrial B2B",
+            "Electronics Manufacturing",
+            "Hardware B2B",
+            "Industrial Automation",
+            "Cyber Security",
+            "Cybersecurity Consultants",
+            "Building & Admin Management",
+            "HRMS",
+            "Talent Lifecycle Management Software",
+            "Training & Learning Solutions",
+            "Analytics",
+            "AI",
+            "BI & ML",
+            "Robotics & Automation",
+            "Logistics & Supply Chain",
+            "WMS",
+            "PLM",
+            "Business Development Software",
+            "Sales Software",
+            "Fintech",
+            "Manufacturing B2B Offerings"
+          ],
+          "positiveSignals": [
+            "Manufacturing company with B2B products or components",
+            "Semiconductor, chip design, or fabrication company",
+            "Industrial equipment or machinery manufacturer",
+            "Owns a proprietary software product or platform",
+            "Product-led B2B company",
+            "Vertical SaaS with a defined niche",
+            "Examples: Veris, 75F, KloudLearn, Lecturio, SkaleUp, OneBill, UV Robots"
+          ],
+          "negativeSignals": [
+            "Agency or body-shop model",
+            "Project-based services without own product",
+            "Generic IT outsourcing"
+          ]
+        },
+        {
+          "id": "priority_manufacturing_semiconductor",
+          "name": "Priority: Manufacturing & Semiconductor",
+          "description": "TGA's highest-priority verticals. Manufacturing, semiconductor, industrial, electronics, and hardware B2B companies should receive HIGH scores — this is who we want to work with most.",
+          "type": "industry",
+          "weight": 10,
+          "required": false,
+          "active": true,
+          "order": 1,
+          "isHardRule": false,
+          "rules": [],
+          "values": [
+            "Manufacturing",
+            "Semiconductor",
+            "Semiconductors",
+            "Industrial B2B",
+            "Electronics Manufacturing",
+            "Hardware B2B",
+            "Industrial Automation",
+            "Precision Manufacturing",
+            "Contract Manufacturing",
+            "OEM B2B",
+            "Chip Design",
+            "Fabrication",
+            "Industrial Equipment",
+            "Machinery Manufacturing"
+          ],
+          "positiveSignals": [
+            "B2B manufacturing with global go-to-market",
+            "Semiconductor or electronics component supplier",
+            "Industrial automation or robotics manufacturer",
+            "OEM selling to other businesses",
+            "High-priority vertical — strong fit for TGA"
+          ],
+          "negativeSignals": [
+            "Pure consumer retail manufacturing with no B2B line",
+            "Manufacturing-only job shop with no product brand"
+          ]
+        },
+        {
+          "id": "employee_size",
+          "name": "Company Size",
+          "description": "Employee count range for ideal customers",
+          "type": "employee_size",
+          "weight": 20,
+          "required": true,
+          "active": true,
+          "order": 2,
+          "isHardRule": true,
+          "minValue": 50,
+          "maxValue": 1000,
+          "rules": [
+            {
+              "id": "emp_min",
+              "field": "employee_count",
+              "operator": "gte",
+              "value": 50,
+              "description": "Minimum 50 employees",
+              "isHardRule": true
+            },
+            {
+              "id": "emp_max",
+              "field": "employee_count",
+              "operator": "lte",
+              "value": 1000,
+              "description": "Maximum 1000 employees",
+              "isHardRule": true
+            }
+          ]
+        },
+        {
+          "id": "target_geography",
+          "name": "Target Geography",
+          "description": "Companies headquartered or actively operating in India, MEA (Middle East & Africa), SEA (Southeast Asia), or USA.",
+          "type": "country",
+          "weight": 15,
+          "required": true,
+          "active": true,
+          "order": 3,
+          "isHardRule": true,
+          "rules": [],
+          "values": [
+            "India",
+            "MEA",
+            "SEA",
+            "USA"
+          ],
+          "positiveSignals": [
+            "Headquartered in India, USA, Middle East, Africa, or Southeast Asia",
+            "Active go-to-market in target regions"
+          ]
+        },
+        {
+          "id": "target_rpc",
+          "name": "Target Decision Makers (RPC)",
+          "description": "Right Persona to Contact — senior marketing, revenue, and growth leaders.",
+          "type": "job_title",
+          "weight": 15,
+          "required": false,
+          "active": true,
+          "order": 4,
+          "isHardRule": false,
+          "rules": [],
+          "values": [
+            "Marketing Head",
+            "Business Development Head",
+            "VP Sales",
+            "VP Marketing",
+            "Director of Sales and Marketing",
+            "Director of Revenue & Growth",
+            "Founder",
+            "Co-founder",
+            "CEO",
+            "CMO",
+            "Chief Strategy Officer",
+            "Demand Generation Head"
+          ],
+          "positiveSignals": [
+            "Senior marketing or revenue leader identifiable on website or LinkedIn",
+            "Founder-led B2B company with clear GTM leadership"
+          ]
+        },
+        {
+          "id": "business_model",
+          "name": "Business Model",
+          "description": "Must be a B2B product or platform company — not a generic service provider.",
+          "type": "business_model",
+          "weight": 10,
+          "required": true,
+          "active": true,
+          "order": 5,
+          "isHardRule": false,
+          "rules": [],
+          "preferredModels": [
+            "B2B"
+          ],
+          "positiveSignals": [
+            "Subscription or license-based product",
+            "Enterprise B2B sales motion",
+            "Manufacturing with B2B offerings",
+            "Semiconductor or industrial B2B sales"
+          ],
+          "negativeSignals": [
+            "Pure services agency",
+            "Staff augmentation",
+            "Project outsourcing"
+          ]
+        },
+        {
+          "id": "excluded_lead_gen_competitors",
+          "name": "Excluded: B2B Lead Gen & Demand Gen",
+          "description": "TGA is a B2B lead generation company. Direct competitors offering lead generation or demand generation services are automatically rejected with score 0.",
+          "type": "exclusion",
+          "weight": 0,
+          "required": true,
+          "active": true,
+          "order": 6,
+          "isHardRule": true,
+          "rules": [],
+          "values": [
+            "B2B Lead Generation",
+            "Lead Generation",
+            "Demand Generation",
+            "Demand Gen",
+            "Lead Gen Agency",
+            "Lead Generation Services",
+            "Demand Generation Services",
+            "Outbound Lead Generation",
+            "Sales Development Services",
+            "Appointment Setting",
+            "BDR Services",
+            "SDR Services",
+            "Pipeline Generation",
+            "Qualified Leads Provider",
+            "Sales Leads Agency"
+          ],
+          "positiveSignals": [],
+          "negativeSignals": [
+            "B2B lead generation",
+            "demand generation",
+            "demand gen",
+            "lead gen agency",
+            "we generate leads for",
+            "qualified B2B leads",
+            "appointment setting services",
+            "sales development outsourcing",
+            "outbound lead generation",
+            "pipeline generation services",
+            "delivering sales & marketing solutions"
+          ]
+        },
+        {
+          "id": "excluded_services",
+          "name": "Excluded Service Providers",
+          "description": "Generic service companies that do NOT fit TGA ICP — automatically disqualify.",
+          "type": "exclusion",
+          "weight": 0,
+          "required": true,
+          "active": true,
+          "order": 7,
+          "isHardRule": true,
+          "rules": [],
+          "values": [
+            "Web Development",
+            "Web Development Services",
+            "Website Development Agency",
+            "Marketing Agency",
+            "Marketing Services",
+            "Digital Marketing Agency",
+            "Generic IT Services",
+            "IT Consulting Services",
+            "Staff Augmentation",
+            "Outsourcing Services",
+            "Freelance Agency"
+          ],
+          "positiveSignals": [],
+          "negativeSignals": [
+            "We build websites for clients",
+            "Full-service marketing agency",
+            "Hire our developers",
+            "Custom development services",
+            "Generic digital agency"
+          ]
+        },
+        {
+          "id": "company_characteristics",
+          "name": "Company Characteristics",
+          "description": "Qualitative signals — product company vs generic service provider.",
+          "type": "company_characteristic",
+          "weight": 5,
+          "required": false,
+          "active": true,
+          "order": 8,
+          "isHardRule": false,
+          "rules": [],
+          "positiveSignals": [
+            "Own product or platform mentioned prominently",
+            "Case studies about product adoption, not just project delivery",
+            "Pricing page or product tiers",
+            "Active product development and roadmap",
+            "Manufacturing company with B2B product line",
+            "Semiconductor or industrial company selling B2B"
+          ],
+          "negativeSignals": [
+            "Portfolio of client websites built",
+            "Services menu: web dev, SEO, social media",
+            "No own product — only client work",
+            "Staffing or body-shop language"
+          ]
+        }
+      ],
+      "metadata": {
+        "createdAt": "2026-09-03T04:08:23.611Z",
+        "updatedAt": "2026-09-03T04:08:23.611Z",
+        "updatedBy": "System",
+        "changeSummary": "Initial TGA ICP v1.0 — product-led B2B companies in India, MEA, SEA, USA"
+      }
+    }
+  }
+]
