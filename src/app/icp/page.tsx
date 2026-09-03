@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Database } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export default async function ICPPage() {
   const icp = await getICP();

@@ -1,16 +1,11 @@
-import fs from "fs";
-import path from "path";
 import type {
   ICPKnowledgeBase,
   ICPVersionRecord,
   AnalysisResult,
 } from "./types";
-import { DEFAULT_ICP_KNOWLEDGE_BASE } from "./knowledge-base";
+import icpCurrentSeed from "../../../data/icp-current.json";
+import icpHistorySeed from "../../../data/icp-history.json";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const ICP_CURRENT_FILE = path.join(DATA_DIR, "icp-current.json");
-const ICP_HISTORY_FILE = path.join(DATA_DIR, "icp-history.json");
-const ANALYSES_FILE = path.join(DATA_DIR, "analyses.json");
 const BLOB_STORE_NAME = "tga-icp-data";
 
 const BLOB_KEYS = {
@@ -19,52 +14,20 @@ const BLOB_KEYS = {
   analyses: "analyses",
 } as const;
 
+const SEED_ICP = icpCurrentSeed as ICPKnowledgeBase;
+const SEED_HISTORY = icpHistorySeed as ICPVersionRecord[];
+
+/**
+ * Detect Netlify/serverless runtime where the filesystem is read-only.
+ * Note: `NETLIFY=true` is set at build time only — at runtime Netlify exposes
+ * `SITE_ID`, `URL`, and `SITE_NAME` instead (see Netlify function env docs).
+ */
 function isNetlifyRuntime(): boolean {
-  return process.env.NETLIFY === "true";
-}
-
-function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-}
-
-/** Read JSON from disk without creating or writing files (safe on read-only FS). */
-function readJsonFileReadOnly<T>(filePath: string, fallback: T): T {
-  try {
-    if (!fs.existsSync(filePath)) return fallback;
-    return JSON.parse(fs.readFileSync(filePath, "utf-8")) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-function readJsonFile<T>(filePath: string, fallback: T): T {
-  if (isNetlifyRuntime()) {
-    return readJsonFileReadOnly(filePath, fallback);
-  }
-
-  ensureDataDir();
-  if (!fs.existsSync(filePath)) {
-    writeJsonFile(filePath, fallback);
-    return fallback;
-  }
-  const raw = fs.readFileSync(filePath, "utf-8");
-  return JSON.parse(raw) as T;
-}
-
-function writeJsonFile<T>(filePath: string, data: T): void {
-  if (isNetlifyRuntime()) return;
-  ensureDataDir();
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-}
-
-function readSeedICP(): ICPKnowledgeBase {
-  return readJsonFileReadOnly(ICP_CURRENT_FILE, DEFAULT_ICP_KNOWLEDGE_BASE);
-}
-
-function readSeedHistory(): ICPVersionRecord[] {
-  return readJsonFileReadOnly(ICP_HISTORY_FILE, []);
+  return (
+    process.env.NETLIFY === "true" ||
+    !!process.env.SITE_ID ||
+    !!process.env.AWS_LAMBDA_FUNCTION_NAME
+  );
 }
 
 async function getBlobStore() {
@@ -94,30 +57,112 @@ async function blobSet<T>(key: string, data: T): Promise<boolean> {
   }
 }
 
+// ─── Local filesystem (dev only — dynamic import avoids bundling fs on Netlify) ─
+
+async function localGetCurrentICP(): Promise<ICPKnowledgeBase> {
+  const fs = await import("fs");
+  const path = await import("path");
+  const file = path.join(process.cwd(), "data", "icp-current.json");
+  if (!fs.existsSync(file)) return SEED_ICP;
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf-8")) as ICPKnowledgeBase;
+  } catch {
+    return SEED_ICP;
+  }
+}
+
+async function localSaveCurrentICP(kb: ICPKnowledgeBase): Promise<void> {
+  const fs = await import("fs");
+  const path = await import("path");
+  const dir = path.join(process.cwd(), "data");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, "icp-current.json"),
+    JSON.stringify(kb, null, 2),
+    "utf-8"
+  );
+}
+
+async function localGetHistory(): Promise<ICPVersionRecord[]> {
+  const fs = await import("fs");
+  const path = await import("path");
+  const file = path.join(process.cwd(), "data", "icp-history.json");
+  if (!fs.existsSync(file)) return [...SEED_HISTORY];
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf-8")) as ICPVersionRecord[];
+  } catch {
+    return [...SEED_HISTORY];
+  }
+}
+
+async function localSaveHistory(history: ICPVersionRecord[]): Promise<void> {
+  const fs = await import("fs");
+  const path = await import("path");
+  const dir = path.join(process.cwd(), "data");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, "icp-history.json"),
+    JSON.stringify(history, null, 2),
+    "utf-8"
+  );
+}
+
+async function localGetAnalyses(): Promise<AnalysisResult[]> {
+  const fs = await import("fs");
+  const path = await import("path");
+  const file = path.join(process.cwd(), "data", "analyses.json");
+  if (!fs.existsSync(file)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf-8")) as AnalysisResult[];
+  } catch {
+    return [];
+  }
+}
+
+async function localSaveAnalyses(analyses: AnalysisResult[]): Promise<void> {
+  const fs = await import("fs");
+  const path = await import("path");
+  const dir = path.join(process.cwd(), "data");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, "analyses.json"),
+    JSON.stringify(analyses, null, 2),
+    "utf-8"
+  );
+}
+
+function sortHistory(history: ICPVersionRecord[]): ICPVersionRecord[] {
+  return history.sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  );
+}
+
+function sortAnalyses(analyses: AnalysisResult[]): AnalysisResult[] {
+  return analyses.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
 // ─── ICP Current ─────────────────────────────────────────────────────────────
 
 export async function getCurrentICP(): Promise<ICPKnowledgeBase> {
-  if (isNetlifyRuntime()) {
-    const cached = await blobGet<ICPKnowledgeBase>(BLOB_KEYS.icpCurrent);
-    if (cached) return cached;
-
-    const seeded = readSeedICP();
-    await blobSet(BLOB_KEYS.icpCurrent, seeded);
-    return seeded;
+  if (!isNetlifyRuntime()) {
+    return localGetCurrentICP();
   }
 
-  return readJsonFile(ICP_CURRENT_FILE, DEFAULT_ICP_KNOWLEDGE_BASE);
+  const cached = await blobGet<ICPKnowledgeBase>(BLOB_KEYS.icpCurrent);
+  if (cached) return cached;
+
+  await blobSet(BLOB_KEYS.icpCurrent, SEED_ICP);
+  return SEED_ICP;
 }
 
 export async function saveCurrentICP(kb: ICPKnowledgeBase): Promise<void> {
-  if (isNetlifyRuntime()) {
-    const saved = await blobSet(BLOB_KEYS.icpCurrent, kb);
-    if (!saved) {
-      console.warn("[storage] Could not persist ICP — Netlify Blobs unavailable");
-    }
+  if (!isNetlifyRuntime()) {
+    await localSaveCurrentICP(kb);
     return;
   }
-  writeJsonFile(ICP_CURRENT_FILE, kb);
+  await blobSet(BLOB_KEYS.icpCurrent, kb);
 }
 
 // ─── ICP History ─────────────────────────────────────────────────────────────
@@ -125,54 +170,39 @@ export async function saveCurrentICP(kb: ICPKnowledgeBase): Promise<void> {
 export async function getICPHistory(): Promise<ICPVersionRecord[]> {
   let history: ICPVersionRecord[];
 
-  if (isNetlifyRuntime()) {
+  if (!isNetlifyRuntime()) {
+    history = await localGetHistory();
+  } else {
     const cached = await blobGet<ICPVersionRecord[]>(BLOB_KEYS.icpHistory);
-    if (cached) {
-      history = cached;
-    } else {
-      history = readSeedHistory();
-      if (history.length === 0) {
-        const current = await getCurrentICP();
-        history = [
-          {
-            version: current.version,
-            updatedAt: current.metadata?.updatedAt ?? new Date().toISOString(),
-            updatedBy: current.metadata?.updatedBy ?? "System",
-            changeSummary: current.metadata?.changeSummary ?? "Initial version",
-            knowledgeBase: current,
-          },
-        ];
-      }
+    history = cached ?? [...SEED_HISTORY];
+
+    if (!cached && history.length > 0) {
       await blobSet(BLOB_KEYS.icpHistory, history);
     }
-  } else {
-    history = readJsonFile(ICP_HISTORY_FILE, []);
   }
 
   const current = await getCurrentICP();
-  const hasCurrent = history.some((h) => h.version === current.version);
-  if (!hasCurrent && history.length === 0) {
-    const initial: ICPVersionRecord = {
-      version: current.version,
-      updatedAt: current.metadata?.updatedAt ?? new Date().toISOString(),
-      updatedBy: current.metadata?.updatedBy ?? "System",
-      changeSummary: current.metadata?.changeSummary ?? "Initial version",
-      knowledgeBase: current,
-    };
-    history.push(initial);
+  if (history.length === 0) {
+    history = [
+      {
+        version: current.version,
+        updatedAt: current.metadata?.updatedAt ?? new Date().toISOString(),
+        updatedBy: current.metadata?.updatedBy ?? "System",
+        changeSummary: current.metadata?.changeSummary ?? "Initial version",
+        knowledgeBase: current,
+      },
+    ];
     await persistHistory(history);
   }
 
-  return history.sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  );
+  return sortHistory(history);
 }
 
 async function persistHistory(history: ICPVersionRecord[]): Promise<void> {
-  if (isNetlifyRuntime()) {
-    await blobSet(BLOB_KEYS.icpHistory, history);
+  if (!isNetlifyRuntime()) {
+    await localSaveHistory(history);
   } else {
-    writeJsonFile(ICP_HISTORY_FILE, history);
+    await blobSet(BLOB_KEYS.icpHistory, history);
   }
 }
 
@@ -191,16 +221,12 @@ export async function addICPVersion(record: ICPVersionRecord): Promise<void> {
 // ─── Analyses ────────────────────────────────────────────────────────────────
 
 export async function getAnalyses(): Promise<AnalysisResult[]> {
-  if (isNetlifyRuntime()) {
-    const cached = await blobGet<AnalysisResult[]>(BLOB_KEYS.analyses);
-    return (cached ?? []).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+  if (!isNetlifyRuntime()) {
+    return sortAnalyses(await localGetAnalyses());
   }
 
-  return readJsonFile<AnalysisResult[]>(ANALYSES_FILE, []).sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  const cached = await blobGet<AnalysisResult[]>(BLOB_KEYS.analyses);
+  return sortAnalyses(cached ?? []);
 }
 
 export async function getAnalysis(id: string): Promise<AnalysisResult | null> {
@@ -212,13 +238,9 @@ export async function saveAnalysis(result: AnalysisResult): Promise<void> {
   const analyses = await getAnalyses();
   analyses.unshift(result);
 
-  if (isNetlifyRuntime()) {
-    const saved = await blobSet(BLOB_KEYS.analyses, analyses);
-    if (!saved) {
-      console.warn("[storage] Could not persist analysis — Netlify Blobs unavailable");
-    }
-    return;
+  if (!isNetlifyRuntime()) {
+    await localSaveAnalyses(analyses);
+  } else {
+    await blobSet(BLOB_KEYS.analyses, analyses);
   }
-
-  writeJsonFile(ANALYSES_FILE, analyses);
 }

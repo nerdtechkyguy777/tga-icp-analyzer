@@ -41,6 +41,7 @@ const actionCards = [
 ];
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export default async function DashboardPage() {
   const icp = await getICP();

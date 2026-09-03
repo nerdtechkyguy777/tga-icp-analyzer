@@ -6,6 +6,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export default async function ICPVersionPage({
   params,
