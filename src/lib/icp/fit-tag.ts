@@ -1,19 +1,39 @@
 import type { AnalysisResult, FitTag, Recommendation } from "./types";
 
+/** Score thresholds: High 80+, Medium 50–79, Low 20–49, Junk 0–19 */
 export const FIT_TAG_THRESHOLDS = {
-  HIGH: 75,
+  HIGH: 80,
   MEDIUM: 50,
-  LOW: 25,
+  LOW: 20,
+} as const;
+
+export const FIT_SCORE_RANGES = {
+  HIGH_FIT: "80 – 100",
+  MEDIUM_FIT: "50 – 79",
+  LOW_FIT: "20 – 49",
+  JUNK: "0 – 19",
 } as const;
 
 export function deriveFitTag(
   icpScore: number,
   disqualified: boolean
 ): FitTag {
-  if (disqualified || icpScore < FIT_TAG_THRESHOLDS.LOW) return "NOT_A_FIT";
+  if (disqualified) return "NOT_A_FIT";
+  if (icpScore < FIT_TAG_THRESHOLDS.LOW) return "JUNK";
   if (icpScore >= FIT_TAG_THRESHOLDS.HIGH) return "HIGH_FIT";
   if (icpScore >= FIT_TAG_THRESHOLDS.MEDIUM) return "MEDIUM_FIT";
   return "LOW_FIT";
+}
+
+export function deriveRecommendation(
+  icpScore: number,
+  disqualified: boolean
+): Recommendation {
+  if (disqualified) return "NOT_A_FIT";
+  if (icpScore >= FIT_TAG_THRESHOLDS.HIGH) return "HIGH_PRIORITY";
+  if (icpScore >= FIT_TAG_THRESHOLDS.MEDIUM) return "MEDIUM_PRIORITY";
+  if (icpScore >= FIT_TAG_THRESHOLDS.LOW) return "LOW_PRIORITY";
+  return "NOT_A_FIT";
 }
 
 export function recommendationToFitTag(recommendation: Recommendation): FitTag {
@@ -21,7 +41,7 @@ export function recommendationToFitTag(recommendation: Recommendation): FitTag {
     HIGH_PRIORITY: "HIGH_FIT",
     MEDIUM_PRIORITY: "MEDIUM_FIT",
     LOW_PRIORITY: "LOW_FIT",
-    NOT_A_FIT: "NOT_A_FIT",
+    NOT_A_FIT: "JUNK",
   };
   return map[recommendation];
 }
@@ -58,6 +78,13 @@ export const FIT_TAG_CONFIG: Record<
     bg: "bg-blue-50",
     text: "text-blue-800",
     border: "border-blue-200",
+  },
+  JUNK: {
+    label: "Junk",
+    badge: "badge-red",
+    bg: "bg-gray-50",
+    text: "text-gray-700",
+    border: "border-gray-300",
   },
   NOT_A_FIT: {
     label: "Not a Fit",

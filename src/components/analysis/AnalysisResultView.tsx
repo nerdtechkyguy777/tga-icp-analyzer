@@ -2,7 +2,7 @@
 
 import type { AnalysisResult } from "@/lib/icp/types";
 import { formatDate } from "@/lib/utils";
-import { FIT_TAG_CONFIG, resolveFitTag } from "@/lib/icp/fit-tag";
+import { FIT_TAG_CONFIG, FIT_SCORE_RANGES, resolveFitTag } from "@/lib/icp/fit-tag";
 import { FitTagBadge } from "./FitTagBadge";
 import { CompanyDataSection } from "./CompanyDataSection";
 import { analysesToCsv, downloadCsv } from "@/lib/analysis/csv";
@@ -80,24 +80,30 @@ export function AnalysisResultView({ result }: AnalysisResultViewProps) {
       </div>
 
       {/* Fit summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <FitSummaryCard
           label="High Fit"
-          range="75 – 100"
+          range={FIT_SCORE_RANGES.HIGH_FIT}
           active={fitTag === "HIGH_FIT"}
           color="border-green-500 bg-green-50"
         />
         <FitSummaryCard
           label="Medium Fit"
-          range="50 – 74"
+          range={FIT_SCORE_RANGES.MEDIUM_FIT}
           active={fitTag === "MEDIUM_FIT"}
           color="border-yellow-500 bg-yellow-50"
         />
         <FitSummaryCard
           label="Low Fit"
-          range="25 – 49"
+          range={FIT_SCORE_RANGES.LOW_FIT}
           active={fitTag === "LOW_FIT"}
           color="border-blue-500 bg-blue-50"
+        />
+        <FitSummaryCard
+          label="Junk"
+          range={FIT_SCORE_RANGES.JUNK}
+          active={fitTag === "JUNK"}
+          color="border-gray-400 bg-gray-50"
         />
       </div>
 

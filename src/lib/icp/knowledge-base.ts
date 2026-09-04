@@ -227,7 +227,7 @@ export const DEFAULT_ICP_KNOWLEDGE_BASE: ICPKnowledgeBase = {
       id: "excluded_solar_renewables",
       name: "Excluded: Solar & Renewables",
       description:
-        "Solar energy, renewable power, and clean-tech energy companies are excluded from TGA ICP — automatically disqualify.",
+        "Companies whose PRIMARY business is solar energy, renewable power, wind, or clean-tech energy generation — automatically disqualify. Does NOT apply to product/automation companies that serve solar clients or mention solar in sustainability copy.",
       type: "exclusion",
       weight: 0,
       required: true,
@@ -238,7 +238,6 @@ export const DEFAULT_ICP_KNOWLEDGE_BASE: ICPKnowledgeBase = {
       values: [
         "Solar Energy",
         "Solar Power",
-        "Solar",
         "Renewable Energy",
         "Renewables",
         "Clean Energy",
@@ -252,12 +251,13 @@ export const DEFAULT_ICP_KNOWLEDGE_BASE: ICPKnowledgeBase = {
       ],
       positiveSignals: [],
       negativeSignals: [
+        "solar panel manufacturer",
         "solar panel installation",
-        "renewable energy solutions",
         "solar EPC contractor",
-        "wind farm",
+        "renewable energy solutions provider",
+        "wind farm developer",
         "clean energy provider",
-        "photovoltaic systems",
+        "photovoltaic modules",
       ],
     },
     {

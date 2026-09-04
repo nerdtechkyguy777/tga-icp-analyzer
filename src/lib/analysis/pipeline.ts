@@ -37,6 +37,9 @@ export async function analyzeCompany(url: string): Promise<AnalysisResult> {
     if (gptEnrichment.isLeadGenCompetitor) {
       enriched.companyType = "lead_gen_competitor";
     }
+    if (gptEnrichment.isSolarRenewablesCompany) {
+      enriched.isSolarRenewablesCompany = true;
+    }
   }
 
   // Step 3: Apollo enrichment (supplements employee count, location — not primary for industry)

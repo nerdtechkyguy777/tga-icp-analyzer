@@ -9,6 +9,7 @@ export interface GPTCompanyEnrichment {
   companyType: "product_platform" | "product_and_services" | "service_agency" | "lead_gen_competitor" | "unknown";
   summary: string;
   isLeadGenCompetitor: boolean;
+  isSolarRenewablesCompany: boolean;
 }
 
 /**
@@ -42,7 +43,8 @@ IMPORTANT DISTINCTIONS:
 - Generic web dev or marketing agencies with NO own product = service providers (excluded).
 - IT/cybersecurity/SaaS companies that sell OWN PRODUCTS and also offer consulting or implementation services = product_and_services (INCLUDED, not excluded).
 - Skillmine-style companies: own software products + professional services = product_and_services.
-- Solar, renewable energy, and clean-tech power companies = excluded (not ICP fit).
+- Solar, renewable energy, and clean-tech power companies whose PRIMARY business is selling solar/wind/renewable power products or services = excluded (not ICP fit).
+- Companies that sell automation, robotics, or IT products and merely mention solar as a customer vertical, sustainability initiative, or incidental keyword are NOT solar companies — set isSolarRenewablesCompany to false.
 
 === TARGET ICP INDUSTRIES (pick the best match) ===
 ${targetIndustries.join(", ")}
@@ -63,7 +65,8 @@ Respond with JSON only:
   "businessModel": "B2B" | "B2C" | "B2B2C" | "Unknown",
   "companyType": "product_platform" | "product_and_services" | "service_agency" | "lead_gen_competitor" | "unknown",
   "summary": "<1-2 sentence description of what the company does>",
-  "isLeadGenCompetitor": <true ONLY if they sell lead gen/demand gen services as their core business>
+  "isLeadGenCompetitor": <true ONLY if they sell lead gen/demand gen services as their core business>,
+  "isSolarRenewablesCompany": <true ONLY if their PRIMARY business is solar panels, renewable energy generation, wind farms, solar EPC, or similar — NOT if they merely serve solar industry clients or mention solar in sustainability copy>
 }`;
 
   try {
@@ -124,7 +127,7 @@ IMPORTANT RULES:
 - Manufacturing, semiconductor, industrial B2B, electronics manufacturing, and hardware B2B companies are HIGH-PRIORITY — score as MATCH with strong reasoning.
 - A product company is NOT excluded just because it mentions "sales", "pipeline", or "demand gen" in a product context.
 - Companies offering BOTH own IT products/platforms AND professional services (hybrid model) should score as MATCH on company characteristics — they are NOT generic agencies.
-- Solar and renewable energy companies should be classified as NO_MATCH / excluded.
+- Solar and renewable energy companies whose PRIMARY business is solar/wind/renewables should be classified as NO_MATCH / excluded — not companies that only serve solar clients or mention solar incidentally.
 - Provide brief reasoning citing evidence from the company data.
 
 === ICP KNOWLEDGE BASE (Version ${icp.version}) ===

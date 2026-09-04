@@ -7,7 +7,7 @@
       "name": "Target Industries",
       "description": "Product-led and platform companies in TGA's core verticals. Manufacturing, semiconductor, and industrial B2B are high-priority targets.",
       "type": "industry",
-      "weight": 29,
+      "weight": 25,
       "required": true,
       "active": true,
       "order": 0,
@@ -60,7 +60,7 @@
       "name": "Priority: Manufacturing & Semiconductor",
       "description": "Informational only — flags high-priority verticals (manufacturing, semiconductor, industrial B2B). Does not affect ICP score.",
       "type": "industry",
-      "weight": 0,
+      "weight": 5,
       "required": false,
       "active": true,
       "order": 1,
@@ -99,7 +99,7 @@
       "name": "Company Size",
       "description": "Employee count range for ideal customers. Contributes to weighted score — outside range lowers score but does not auto-disqualify.",
       "type": "employee_size",
-      "weight": 10,
+      "weight": 20,
       "required": false,
       "active": true,
       "order": 2,
@@ -123,14 +123,14 @@
         }
       ],
       "minValue": 50,
-      "maxValue": 20000
+      "maxValue": 50000
     },
     {
       "id": "target_geography",
       "name": "Target Geography",
       "description": "Companies headquartered or actively operating in India, MEA (Middle East & Africa), SEA (Southeast Asia), or USA. Contributes to weighted score — outside target regions lowers score but does not auto-disqualify.",
       "type": "country",
-      "weight": 18,
+      "weight": 25,
       "required": false,
       "active": true,
       "order": 3,
@@ -152,7 +152,7 @@
       "name": "Business Model",
       "description": "Must be a B2B product or platform company — not a generic service provider.",
       "type": "business_model",
-      "weight": 12,
+      "weight": 20,
       "required": true,
       "active": true,
       "order": 5,
@@ -219,7 +219,7 @@
     {
       "id": "excluded_solar_renewables",
       "name": "Excluded: Solar & Renewables",
-      "description": "Solar energy, renewable power, and clean-tech energy companies are excluded from TGA ICP — automatically disqualify.",
+      "description": "Companies whose PRIMARY business is solar energy, renewable power, wind, or clean-tech energy generation — automatically disqualify. Does NOT apply to product/automation companies that serve solar clients or mention solar in sustainability copy.",
       "type": "exclusion",
       "weight": 0,
       "required": true,
@@ -229,17 +229,17 @@
       "rules": [],
       "positiveSignals": [],
       "negativeSignals": [
+        "solar panel manufacturer",
         "solar panel installation",
-        "renewable energy solutions",
         "solar EPC contractor",
-        "wind farm",
+        "renewable energy solutions provider",
+        "wind farm developer",
         "clean energy provider",
-        "photovoltaic systems"
+        "photovoltaic modules"
       ],
       "values": [
         "Solar Energy",
         "Solar Power",
-        "Solar",
         "Renewable Energy",
         "Renewables",
         "Clean Energy",
@@ -290,7 +290,7 @@
       "name": "Company Characteristics",
       "description": "Qualitative signals — product company vs generic service provider.",
       "type": "company_characteristic",
-      "weight": 6,
+      "weight": 5,
       "required": false,
       "active": true,
       "order": 9,
@@ -313,11 +313,11 @@
       ]
     }
   ],
-  "version": "1.2",
+  "version": "1.6",
   "metadata": {
     "createdAt": "2026-09-03T04:08:23.611Z",
-    "updatedAt": "2026-09-03T08:02:00.000Z",
+    "updatedAt": "2026-09-03T08:08:58.834Z",
     "updatedBy": "Admin",
-    "changeSummary": "Lowered Company Size weight to 10; redistributed +10 across other scoring criteria"
+    "changeSummary": "Weihtage"
   }
 }

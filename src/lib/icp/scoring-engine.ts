@@ -6,7 +6,7 @@ import type {
   Recommendation,
   FitTag,
 } from "./types";
-import { deriveFitTag } from "./fit-tag";
+import { deriveFitTag, deriveRecommendation } from "./fit-tag";
 
 interface CompanyData {
   name?: string;
@@ -24,6 +24,7 @@ interface CompanyData {
   gptSummary?: string;
   companyType?: string;
   industrySource?: "gpt" | "apollo" | "heuristic";
+  isSolarRenewablesCompany?: boolean;
   [key: string]: unknown;
 }
 
@@ -120,6 +121,135 @@ function isProductLedCompany(company: CompanyData): boolean {
   );
 }
 
+/** Solar/renewables exclusion — primary business only, not incidental mentions or customer verticals. */
+function evaluateSolarRenewablesExclusion(
+  company: CompanyData,
+  icp: ICPKnowledgeBase
+): CriterionEvaluation {
+  const criterion = icp.criteria.find((c) => c.id === "excluded_solar_renewables");
+  const criterionName = criterion?.name ?? "Excluded: Solar & Renewables";
+
+  // Product-led companies in target ICP industries are not solar providers
+  // (e.g. Addverb serves "solar and battery" verticals but sells warehouse automation)
+  if (isProductLedCompany(company) && matchesTargetIndustry(company, icp)) {
+    return {
+      criterionId: "excluded_solar_renewables",
+      criterionName,
+      weight: 0,
+      result: "MATCH",
+      score: 100,
+      isHardRule: true,
+      disqualified: false,
+      reasoning:
+        "Product/platform company in target ICP industry — not a solar/renewables provider (incidental mentions ignored)",
+    };
+  }
+
+  const industry = (company.industry ?? "").toLowerCase().trim();
+  const name = (company.name ?? "").toLowerCase();
+  const website = (company.website ?? "").toLowerCase();
+  const primaryText = `${company.gptSummary ?? ""} ${company.description ?? ""}`.toLowerCase();
+
+  const PRIMARY_SOLAR_INDUSTRIES = [
+    "solar energy",
+    "solar power",
+    "renewable energy",
+    "renewables",
+    "clean energy",
+    "wind energy",
+    "wind power",
+    "photovoltaic",
+    "green energy",
+    "solar epc",
+    "solar installation",
+  ];
+
+  for (const term of PRIMARY_SOLAR_INDUSTRIES) {
+    if (
+      industry === term ||
+      industry.startsWith(`${term} `) ||
+      industry.endsWith(` ${term}`) ||
+      industry.includes(`${term} company`)
+    ) {
+      return solarDisqualified(criterionName, term, `Primary industry: ${company.industry}`);
+    }
+  }
+
+  // Company/domain name signals (e.g. vikramsolar.com)
+  const SOLAR_NAME_PATTERNS = [
+    "solar",
+    "renewable",
+    "photovoltaic",
+    "windpower",
+    "wind-power",
+    "greentech energy",
+  ];
+  for (const pattern of SOLAR_NAME_PATTERNS) {
+    if (name.includes(pattern) || website.includes(pattern)) {
+      return solarDisqualified(criterionName, pattern, `Company/domain name indicates solar/renewables focus`);
+    }
+  }
+
+  // Strong phrases indicating solar/renewables IS the core business (not sustainability copy)
+  const PRIMARY_BUSINESS_PHRASES = [
+    "solar panel manufacturer",
+    "solar panel manufacturing",
+    "solar module manufacturer",
+    "manufacturer of solar panels",
+    "solar panel installation",
+    "solar epc contractor",
+    "solar epc company",
+    "renewable energy solutions provider",
+    "renewable energy company",
+    "leading solar company",
+    "solar power company",
+    "photovoltaic modules",
+    "wind farm developer",
+    "wind energy company",
+    "clean energy provider",
+    "we manufacture solar",
+    "solar modules production",
+  ];
+
+  for (const phrase of PRIMARY_BUSINESS_PHRASES) {
+    if (primaryText.includes(phrase)) {
+      return solarDisqualified(criterionName, phrase, "Primary business description indicates solar/renewables");
+    }
+  }
+
+  if (company.isSolarRenewablesCompany === true) {
+    return solarDisqualified(criterionName, "Solar/Renewables", "GPT classified as primary solar/renewables company");
+  }
+
+  return {
+    criterionId: "excluded_solar_renewables",
+    criterionName,
+    weight: 0,
+    result: industry || primaryText ? "MATCH" : "UNKNOWN",
+    score: industry || primaryText ? 100 : 25,
+    isHardRule: true,
+    disqualified: false,
+    reasoning: "No primary solar/renewables business detected — incidental mentions ignored",
+  };
+}
+
+function solarDisqualified(
+  criterionName: string,
+  match: string,
+  detail: string
+): CriterionEvaluation {
+  return {
+    criterionId: "excluded_solar_renewables",
+    criterionName,
+    weight: 0,
+    result: "NO_MATCH",
+    score: 0,
+    isHardRule: true,
+    disqualified: true,
+    reasoning: `Solar/renewables company detected: ${match} — ${detail} — score 0`,
+  };
+}
+
 function evaluateHardRule(
   criterion: ICPCriterion,
   company: CompanyData,
@@ -155,6 +285,10 @@ function evaluateHardRule(
     }
 
     case "exclusion": {
+      if (criterion.id === "excluded_solar_renewables" && icp) {
+        return evaluateSolarRenewablesExclusion(company, icp);
+      }
+
       const industry = (company.industry ?? "").toLowerCase();
       const description = (company.description ?? "").toLowerCase();
       const name = (company.name ?? "").toLowerCase();
@@ -216,13 +350,10 @@ function evaluateHardRule(
         disqualified = true;
         result = "NO_MATCH";
         const isLeadGenRule = criterion.id === "excluded_lead_gen_competitors";
-        const isSolarRule = criterion.id === "excluded_solar_renewables";
         reasons.push(
           isLeadGenRule
             ? `Competitor detected (B2B lead gen/demand gen): ${match} — score 0`
-            : isSolarRule
-              ? `Solar/renewables company detected: ${match} — score 0`
-              : `Excluded service/provider detected: ${match}`
+            : `Excluded service/provider detected: ${match}`
         );
       } else if (industry || description || name) {
         result = "MATCH";
@@ -498,12 +629,7 @@ export function scoreICP(
     };
   }
 
-  let recommendation: Recommendation;
-  if (icpScore >= 75) recommendation = "HIGH_PRIORITY";
-  else if (icpScore >= 50) recommendation = "MEDIUM_PRIORITY";
-  else if (icpScore >= 25) recommendation = "LOW_PRIORITY";
-  else recommendation = "NOT_A_FIT";
-
+  let recommendation = deriveRecommendation(icpScore, false);
   const fitTag = deriveFitTag(icpScore, false);
 
   return {

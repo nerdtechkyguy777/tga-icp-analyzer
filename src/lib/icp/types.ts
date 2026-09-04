@@ -37,7 +37,7 @@ export type Recommendation =
   | "LOW_PRIORITY"
   | "NOT_A_FIT";
 
-export type FitTag = "HIGH_FIT" | "MEDIUM_FIT" | "LOW_FIT" | "NOT_A_FIT";
+export type FitTag = "HIGH_FIT" | "MEDIUM_FIT" | "LOW_FIT" | "JUNK" | "NOT_A_FIT";
 
 export interface ICPRule {
   id: string;
